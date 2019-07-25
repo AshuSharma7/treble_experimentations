@@ -191,6 +191,13 @@ function get_rom_type() {
                 treble_generate="slim"
                 extra_make_options="WITHOUT_CHECK_API=true"
                 ;;
+            dot)
+                mainrepo="https://github.com/DotOS/manifest.git"
+                mainbranch="dot-p"
+                localManifestBranch="android-9.0"
+                treble_generate="dot"
+                extra_make_options="WITHOUT_CHECK_API=true"
+                ;;
 	    havoc)
                 mainrepo="https://github.com/Havoc-OS/android_manifest.git"
                 mainbranch="pie"
@@ -245,7 +252,7 @@ function parse_variant() {
         exit 2
     fi
 
-    echo "treble_${processor_type}_${partition_layout}${gapps_selection}${su_selection}-${build_type_selection}"
+    echo "dot_treble_${processor_type}_${partition_layout}${gapps_selection}${su_selection}-${build_type_selection}"
 }
 
 declare -a variant_codes
@@ -342,7 +349,7 @@ function patch_things() {
 }
 
 function build_variant() {
-    lunch "$1"
+    lunch dot_"$1"-userdebug
     make $extra_make_options BUILD_NUMBER="$rom_fp" installclean
     make $extra_make_options BUILD_NUMBER="$rom_fp" -j "$jobs" systemimage
     make $extra_make_options BUILD_NUMBER="$rom_fp" vndk-test-sepolicy
@@ -386,6 +393,7 @@ jack_env
 
 . build/envsetup.sh
 
-for (( idx=0; idx < ${#variant_codes[*]}; idx++ )); do
-    build_variant "${variant_codes[$idx]}" "${variant_names[$idx]}"
-done
+buildVariant treble_arm64_avN-userdebug arm64-aonly-vanilla-nosu
+buildVariant treble_arm64_agN-userdebug arm64-aonly-gapps-nosu
+buildVariant treble_arm64_bvN-userdebug arm64-ab-vanilla-nosu
+buildVariant treble_arm64_bgN-userdebug arm64-ab-gapps-nosu
